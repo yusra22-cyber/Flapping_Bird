@@ -17,105 +17,113 @@
     </div>
 
     <script>
-        //  const TopBlock=document.getElementById("top-block")
-        //  const BottomBlock=document.getElementById("bottom-block")
-           const Game=document.getElementById("game")
-           const Ball=document.createElement("button")
-            Ball.className="absolute w-8 h-8 rounded-full bg-red-500 top-1/2 -translate-x-1/2 -translate-y-1/2 "
-            Game.appendChild(Ball)
-            let score = 0
-            const scoreDisplay = document.createElement("p")
-            Game.appendChild(scoreDisplay)
-            scoreDisplay.innerText = "Score: 0"
+       const Game = document.getElementById("game")
+const Ball = document.createElement("button")
+Ball.className = "absolute w-8 h-8 rounded-full bg-red-500 top-1/2 -translate-x-1/2 -translate-y-1/2"
+Game.appendChild(Ball)
 
-            let Balltop=Game.clientHeight/2
-            let speed=0
-            const BallPulling=0.5
-            const flappower= -8
-            let gameOver=false
-           
-          function blocks(){
-            if(gameOver) location.reload()
+let score = 0
+const scoreDisplay = document.createElement("p")
+Game.appendChild(scoreDisplay)
+scoreDisplay.innerText = "Score: 0"
 
-            const containerHeight=500
-            const TOPHeight=50+Math.random()*250
-            const gap=150
-            const BOTTOMHeight=containerHeight-TOPHeight-gap
+let Balltop = Game.clientHeight / 2
+let speed = 0
+const BallPulling = 0.5
+const flappower = -8
+let gameOver = false
+let lastPipeTime = 0
 
+Ball.onclick = () => { if (!gameOver) speed = flappower }
+document.addEventListener("keydown", e => {
+    if (!gameOver && e.code === "Space") speed = flappower
+})
 
-            const TopBlock=document.createElement("div")
-            TopBlock.className=" w-[5rem] bg-black absolute top-0 right-0 "
-            TopBlock.style.height=TOPHeight+"px"
-            TopBlock.counted=false
- 
-            const BottomBlock=document.createElement("div")
-            BottomBlock.className=" w-[5rem] bg-black absolute bottom-0 right-0"
-            BottomBlock.style.height=BOTTOMHeight+"px"
+function blocks() {
+    const containerHeight = 500
+    const TOPHeight = 50 + Math.random() * 250
+    const gap = 150
+    const BOTTOMHeight = containerHeight - TOPHeight - gap
 
-            Game.appendChild(TopBlock)
-            Game.appendChild(BottomBlock)
+    const TopBlock = document.createElement("div")
+    TopBlock.className = "w-[5rem] bg-black absolute top-0 right-0"
+    TopBlock.style.height = TOPHeight + "px"
+    TopBlock.counted = false
 
-            let position=0
-            const move=setInterval(()=>{
-                if(gameOver){
-                    clearInterval(move)
-                    return
-                }
+    const BottomBlock = document.createElement("div")
+    BottomBlock.className = "w-[5rem] bg-black absolute bottom-0 right-0"
+    BottomBlock.style.height = BOTTOMHeight + "px"
 
-                position += 4
-                TopBlock.style.right=position+"px"
-                BottomBlock.style.right=position+"px"
+    Game.appendChild(TopBlock)
+    Game.appendChild(BottomBlock)
 
-                if(position>Game.clientWidth+100){
-                    clearInterval(move)
-                    TopBlock.remove()
-                    BottomBlock.remove()
-                }
+    return { TopBlock, BottomBlock, position: 0 }
+}
 
-                const ballRect=Ball.getBoundingClientRect()
-                const TopRect=TopBlock.getBoundingClientRect()
-                const BottomRect=BottomBlock.getBoundingClientRect()
-                if (TopBlock.counted == false && TopRect.right < ballRect.left) {
-                  score += 1
-                  TopBlock.counted = true
-                   scoreDisplay.innerText = "Score: " + score
-                   }
+let pipePairs = []
+let lastTime = null
 
-               if( ballRect.right > TopRect.left && ballRect.left < TopRect.right && ballRect.bottom > TopRect.top && ballRect.top < TopRect.bottom){
-                 gameOver = true 
-                alert("GameOver")
-                location.reload()
-               } 
-               if( ballRect.right > BottomRect.left && ballRect.left < BottomRect.right && ballRect.bottom > BottomRect.top && ballRect.top < BottomRect.bottom) {
-                gameOver = true 
-                alert("GameOver")
-                location.reload()
-            }
-            },20)
-            
-         }
-         Ball.onclick=()=>{
-            if(!gameOver) speed=flappower
-         }
-         document.addEventListener("keydown", e => {
-            if(!gameOver && e.code === "Space") speed = flappower
-            })
+function gameLoop(ts) {
+    if (!lastTime) lastTime = ts
+    const dt = ts - lastTime
+    lastTime = ts
 
-        setInterval(()=>{
-            if(gameOver) location.reload()
+    if (gameOver) { location.reload(); return }
 
-            speed=speed+BallPulling
-            Balltop=Balltop+speed
+    // move bird
+    speed += BallPulling
+    Balltop += speed
+    if (Balltop < 0) Balltop = 0
+    if (Balltop > Game.clientHeight - Ball.clientHeight) {
+        gameOver = true
+    }
+    Ball.style.top = Balltop + "px"
 
-             if(Balltop < 0) Balltop=0
-             if(Balltop > Game.clientHeight - Ball.clientHeight){
-                Balltop=Game.clientHeight - Ball.clientHeight
-                gameOver=true
-             }
-             Ball.style.top=Balltop+"px"
-        },20)
-        blocks()
-        setInterval(blocks,1000)
+    // spawn pipes every 1.5 seconds
+    if (ts - lastPipeTime > 1500) {
+        pipePairs.push(blocks())
+        lastPipeTime = ts
+    }
+
+    // move pipes
+    pipePairs = pipePairs.filter(({ TopBlock, BottomBlock, position }, i) => {
+        position += 4
+        pipePairs[i].position = position
+        TopBlock.style.right = position + "px"
+        BottomBlock.style.right = position + "px"
+
+        if (position > Game.clientWidth + 100) {
+            TopBlock.remove()
+            BottomBlock.remove()
+            return false
+        }
+
+        const ballRect = Ball.getBoundingClientRect()
+        const TopRect = TopBlock.getBoundingClientRect()
+        const BottomRect = BottomBlock.getBoundingClientRect()
+
+        if (!TopBlock.counted && TopRect.right < ballRect.left) {
+            score++
+            TopBlock.counted = true
+            scoreDisplay.innerText = "Score: " + score
+        }
+
+        if (ballRect.right > TopRect.left && ballRect.left < TopRect.right &&
+            ballRect.bottom > TopRect.top && ballRect.top < TopRect.bottom) {
+            gameOver = true
+        }
+        if (ballRect.right > BottomRect.left && ballRect.left < BottomRect.right &&
+            ballRect.bottom > BottomRect.top && ballRect.top < BottomRect.bottom) {
+            gameOver = true
+        }
+
+        return true
+    })
+
+    requestAnimationFrame(gameLoop)
+}
+
+requestAnimationFrame(gameLoop)
     </script>
 </body>
 </html>
