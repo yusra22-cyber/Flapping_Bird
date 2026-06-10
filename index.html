@@ -8,39 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-#bird {
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    border-radius: 50% 50% 50% 40%;
-    background: #FFD700;
-    border: 2px solid #FFA500;
-    cursor: pointer;
-    z-index: 10;
-}
-#bird::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 8px;
-    background: #FF6600;
-    border-radius: 2px;
-    right: -10px;
-    top: 12px;
-}
-#bird::before {
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: white;
-    border-radius: 50%;
-    top: 6px;
-    left: 8px;
-    box-shadow: inset -2px -1px 0 #333;
-}
-</style>
 </head>
 <body class="bg-red-50 h-screen flex justify-center items-center flex-col">
    <h1 class="text-red-500 text-center text-5xl [-webkit-text-stroke:1px_red] [text-shadow:-3px_-2px_6px_black]">Fllaping Bird Game</h1>
@@ -52,7 +19,7 @@
     <script>
        const Game = document.getElementById("game")
        const Ball = document.createElement("div")
-        Ball.id="bird"
+        Ball.className = "absolute w-8 h-8 rounded-full bg-red-500 top-1/2 -translate-x-1/2 -translate-y-1/2"
 Game.appendChild(Ball)
 
 let score = 0
