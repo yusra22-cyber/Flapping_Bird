@@ -18,8 +18,18 @@
 
     <script>
        const Game = document.getElementById("game")
-const Ball = document.createElement("button")
-Ball.className = "absolute w-8 h-8 rounded-full bg-red-500 top-1/2 -translate-x-1/2 -translate-y-1/2"
+       const Ball = document.createElement("button")
+Ball.style.cssText = `
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    font-size: 28px;
+    line-height: 36px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+`
+Ball.innerText = "🐦"
 Game.appendChild(Ball)
 
 let score = 0
