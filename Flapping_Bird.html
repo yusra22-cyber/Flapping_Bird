@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappping Bird Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-red-50 h-screen flex justify-center items-center flex-col">
+   <h1 class="text-red-500 text-center text-5xl [-webkit-text-stroke:1px_red] [text-shadow:-3px_-2px_6px_black]">Fllaping Bird Game</h1>
+    <div class="relative w-full h-[500px] flex flex-col mt-10  p-10 border-2 border-black" id="game" >
+       <!-- <div class="absolute top-0 w-[5rem] h-[8rem] bg-black" id="top-block"></div>
+       <div class="absolute bottom-0 w-[5rem] h-[15rem] bg-black" id="bottom-block"></div> -->
+    </div>
+
+    <script>
+        //  const TopBlock=document.getElementById("top-block")
+        //  const BottomBlock=document.getElementById("bottom-block")
+           const Game=document.getElementById("game")
+           const Ball=document.createElement("button")
+            Ball.className="absolute w-8 h-8 rounded-full bg-red-500 top-1/2 -translate-x-1/2 -translate-y-1/2 "
+            Game.appendChild(Ball)
+            let score = 0
+            const scoreDisplay = document.createElement("p")
+            Game.appendChild(scoreDisplay)
+            scoreDisplay.innerText = "Score: 0"
+
+            let Balltop=Game.clientHeight/2
+            let speed=0
+            const BallPulling=0.5
+            const flappower= -8
+            let gameOver=false
+           
+          function blocks(){
+            if(gameOver) location.reload()
+
+            const containerHeight=500
+            const TOPHeight=50+Math.random()*250
+            const gap=150
+            const BOTTOMHeight=containerHeight-TOPHeight-gap
+
+
+            const TopBlock=document.createElement("div")
+            TopBlock.className=" w-[5rem] bg-black absolute top-0 right-0 "
+            TopBlock.style.height=TOPHeight+"px"
+            TopBlock.counted=false
+ 
+            const BottomBlock=document.createElement("div")
+            BottomBlock.className=" w-[5rem] bg-black absolute bottom-0 right-0"
+            BottomBlock.style.height=BOTTOMHeight+"px"
+
+            Game.appendChild(TopBlock)
+            Game.appendChild(BottomBlock)
+
+            let position=0
+            const move=setInterval(()=>{
+                if(gameOver){
+                    clearInterval(move)
+                    return
+                }
+
+                position += 4
+                TopBlock.style.right=position+"px"
+                BottomBlock.style.right=position+"px"
+
+                if(position>Game.clientWidth+100){
+                    clearInterval(move)
+                    TopBlock.remove()
+                    BottomBlock.remove()
+                }
+
+                const ballRect=Ball.getBoundingClientRect()
+                const TopRect=TopBlock.getBoundingClientRect()
+                const BottomRect=BottomBlock.getBoundingClientRect()
+                if (TopBlock.counted == false && TopRect.right < ballRect.left) {
+                  score += 1
+                  TopBlock.counted = true
+                   scoreDisplay.innerText = "Score: " + score
+                   }
+
+               if( ballRect.right > TopRect.left && ballRect.left < TopRect.right && ballRect.bottom > TopRect.top && ballRect.top < TopRect.bottom){
+                 gameOver = true 
+                alert("GameOver")
+                location.reload()
+               } 
+               if( ballRect.right > BottomRect.left && ballRect.left < BottomRect.right && ballRect.bottom > BottomRect.top && ballRect.top < BottomRect.bottom) {
+                gameOver = true 
+                alert("GameOver")
+                location.reload()
+            }
+            },20)
+            
+         }
+         Ball.onclick=()=>{
+            if(!gameOver) speed=flappower
+         }
+         document.addEventListener("keydown", e => {
+            if(!gameOver && e.code === "Space") speed = flappower
+            })
+
+        setInterval(()=>{
+            if(gameOver) location.reload()
+
+            speed=speed+BallPulling
+            Balltop=Balltop+speed
+
+             if(Balltop < 0) Balltop=0
+             if(Balltop > Game.clientHeight - Ball.clientHeight){
+                Balltop=Game.clientHeight - Ball.clientHeight
+                gameOver=true
+             }
+             Ball.style.top=Balltop+"px"
+        },20)
+        blocks()
+        setInterval(blocks,1000)
+    </script>
+</body>
+</html>
